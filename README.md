@@ -58,10 +58,10 @@ docker-compose up -d --build
    python main.py
    ```
 
-## 📝 Environment Variables
+## Environment Variables
 The application requires environment variables for configuration. Create a `.env` file in the root directory (this file is ignored by Git for security purposes) and add your secrets and database urls there. 
 
-## 🛡️ Security
+## Security
 Security middleware and authentication strategies are handled centrally via `security.py`.
 
 ---
