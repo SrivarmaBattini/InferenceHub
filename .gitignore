@@ -1,0 +1,27 @@
+# Environments
+.env
+venv/
+env/
+.venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local Database
+inferencehub.db
+*.sqlite3
+*.db
+
+# Logs
+*.log
+
+# Caching
+.pytest_cache/
+.mypy_cache/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store

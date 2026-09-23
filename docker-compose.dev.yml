@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      target: builder
+    command: >
+      uvicorn main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+    environment:
+      JSON_LOGS:   "false"
+      DATABASE_URL: postgresql+asyncpg://ihub:ihubpass@postgres:5432/inferencehub
+      REDIS_URL:    redis://redis:6379/0
+      SECRET_KEY:   dev-secret-key-not-for-production
+    volumes:
+      - .:/app
+      - /app/venv
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL:    admin@inferencehub.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy

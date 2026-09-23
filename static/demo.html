@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InferenceHub API Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --primary: #8b5cf6;
+      --primary-hover: #7c3aed;
+      --bg: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --error: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .container {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 1.5rem;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 650px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(to right, #a78bfa, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: white;
+      padding: 0.875rem 1rem;
+      border-radius: 0.75rem;
+      font-size: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      transition: all 0.2s ease;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+    }
+
+    button {
+      width: 100%;
+      background: linear-gradient(to right, var(--primary), var(--primary-hover));
+      color: white;
+      border: none;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .output-section {
+      margin-top: 2rem;
+      display: none;
+    }
+
+    .output-section.active {
+      display: block;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .terminal {
+      background: #000;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      min-height: 120px;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+    }
+
+    .terminal .stream-item {
+      margin-bottom: 0.25rem;
+      color: #6ee7b7;
+    }
+
+    .result-card {
+      margin-top: 1rem;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      text-align: center;
+      display: none;
+    }
+
+    .result-card h2 {
+      color: var(--success);
+      font-size: 2.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .result-card p {
+      color: #a7f3d0;
+      font-size: 0.9rem;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>InferenceHub</h1>
+    <p class="subtitle">Stream live predictions directly from the ML models using SSE (Server-Sent Events). The model is
+      ready!</p>
+
+    <div class="input-group">
+      <label for="token">Authentication Token (JWT)</label>
+      <input type="text" id="token" placeholder="eyJhbGciOiJIUzI1NiIsIn...” />
+    </div>
+
+    <div class=" input-group">
+      <label for="features">Input Features (Comma separated)</label>
+      <input type="text" id="features" value="0.5,-1.2,0.8,2.1,-0.3" />
+    </div>
+
+    <button id="runBtn" onclick="startStream()">Initiate Prediction</button>
+
+    <div class="output-section" id="outputSection">
+      <label>Stream Processing Log</label>
+      <div class="terminal" id="terminal"></div>
+
+      <div class="result-card" id="resultCard">
+        <h2 id="predictionValue">...</h2>
+        <p id="predictionMeta">Waiting for result...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let source = null;
+
+    function startStream() {
+      const token = document.getElementById("token").value.trim();
+      const features = document.getElementById("features").value.trim();
+      const terminal = document.getElementById("terminal");
+      const resultCard = document.getElementById("resultCard");
+      const btn = document.getElementById("runBtn");
+      const outputSection = document.getElementById("outputSection");
+
+      if (!token) {
+        alert("Please paste your JWT Token first!");
+        return;
+      }
+
+      // Reset state for new run
+      if (source) source.close();
+      terminal.innerHTML = "";
+      outputSection.classList.add("active");
+      resultCard.style.display = "none";
+      btn.innerText = "Processing...";
+      btn.style.opacity = "0.7";
+      btn.disabled = true;
+
+      const url = `/stream/predict?features=${features}&token=${token}`;
+      source = new EventSource(url);
+
+      source.addEventListener("token", e => {
+        const d = JSON.parse(e.data);
+        const p = document.createElement("div");
+        p.className = "stream-item";
+        p.innerText = `> Generating node... [${d.token}]`;
+        terminal.appendChild(p);
+        terminal.scrollTop = terminal.scrollHeight;
+      });
+
+      source.addEventListener("result", e => {
+        const d = JSON.parse(e.data);
+        resultCard.style.display = "block";
+        document.getElementById("predictionValue").innerText = d.prediction;
+        document.getElementById("predictionMeta").innerText = `Confidence: ${(d.confidence * 100).toFixed(1)}%  |  Latency: ${d.latency_ms}ms`;
+
+        const finishMsg = document.createElement("div");
+        finishMsg.style.color = "#fff";
+        finishMsg.innerText = `> Connection closed gracefully.`;
+        terminal.appendChild(finishMsg);
+      });
+
+      source.addEventListener("done", () => {
+        source.close();
+        resetButton();
+      });
+
+      source.addEventListener("error", e => {
+        const err = document.createElement("div");
+        err.style.color = "var(--error)";
+        err.innerText = `> Error establishing connection: ${e.data || 'Invalid Token or Server unavailable'}`;
+        terminal.appendChild(err);
+        source.close();
+        resetButton();
+      });
+
+      function resetButton() {
+        btn.innerText = "Initiate Prediction";
+        btn.style.opacity = "1";
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+
+</html>
